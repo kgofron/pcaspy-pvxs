@@ -81,6 +81,20 @@ So "enable pvxs in pcaspy IOCs" means: **add PVA (via the pvxs stack / p4p) to I
 
 ---
 
+### Option 1b: pcaspy_wrapper (drop-in PVA alongside CA)
+
+**Idea:** Use a wrapper that subclasses pcaspy’s `SimplePV`/`Driver`/`SimpleServer` so that each CA PV is also served over PVA in the same process. The only IOC change is to replace `from pcaspy import ...` with `from pcaspy_wrapper import ...`. No rewrite of driver logic.
+
+**Current state:** [pcaspy_wrapper](https://code.ornl.gov/idac/ex/pcaspy_wrapper) (Alex Sobhani) uses **pvapy** (classic stack); arrays and limits not yet supported. Porting the PVA side to **p4p** would deliver pvxs and align with this plan. See [evaluation-pcaspy-wrapper.md](evaluation-pcaspy-wrapper.md) for evaluation and the view of Xiaoqiang Wang (pcaspy author): he recommends using the existing PVA Python binding (p4p) rather than extending pcaspy; the wrapper is consistent with that when it uses p4p under the hood.
+
+**Pros:** Minimal IOC change; one process, CA + PVA; no hand-written mirroring per IOC. Good short- to medium-term path while long-term migration (PyDevice, C++) proceeds.
+
+**Cons:** Depends on pcaspy internals; currently pvapy (not pvxs) until p4p port; arrays/limits need to be added.
+
+**Feasibility:** High for scalar PVs; p4p port and array/limit support are the main follow-ups.
+
+---
+
 ### Option 2: External CA-to-PVA gateway (no change to pcaspy IOC)
 
 **Idea:** Leave the pcaspy IOC as-is (CA only). Run a **separate process** that is a CA client and a PVA server: it subscribes to the pcaspy PVs over CA and re-serves them over PVA. Clients that need PVA talk to the gateway; clients that use CA talk to pcaspy as today.
@@ -141,7 +155,7 @@ So "enable pvxs in pcaspy IOCs" means: **add PVA (via the pvxs stack / p4p) to I
 
 - **Short term / minimal change:** **Option 2** – Run a **CA-to-PVA gateway** (e.g. pvaify or a custom p4p-based gateway) in front of existing pcaspy IOCs. No pcaspy changes; PVA clients get access via pvxs (if the gateway uses p4p) or classic PVA (if using pvaify).
 
-- **Medium term / keep Python IOC, add pvxs:** **Option 1** – **Dual server in process:** extend the pcaspy-based IOC (or a thin wrapper) to start a **p4p** PVA server and mirror Driver-backed PVs into p4p SharedPVs. Delivers pvxs (via p4p) in the same process as the existing CA server.
+- **Medium term / keep Python IOC, add pvxs:** **Option 1** or **Option 1b** – **Dual server in process:** either hand-written p4p mirroring (Option 1) or **pcaspy_wrapper** (Option 1b: drop-in import change; port wrapper to p4p for pvxs). See [evaluation-pcaspy-wrapper.md](evaluation-pcaspy-wrapper.md).
 
 - **Long term / standard EPICS stack:** **Option 3** – Migrate to **C++ soft IOC + QSRV 2** where the application allows, for native CA + PVA (pvxs) without Python in the IOC process. **Option 4** – Migrate to **PyDevice + QSRV 2** to keep Python device logic while using a standard EPICS soft IOC with native CA + PVA (pvxs).
 
@@ -155,4 +169,24 @@ So "enable pvxs in pcaspy IOCs" means: **add PVA (via the pvxs stack / p4p) to I
 
 3. **Evaluate Option 2:** Deploy pvaify or a minimal p4p CA→PVA gateway against a test pcaspy IOC; measure latency and behaviour vs direct CA; decide whether gateway is acceptable for your use cases.
 
-4. **Decide scope:** Whether "pvxs in pcaspy IOCs" is only "PVA access to the same PVs" (Options 1 or 2) or also "future migration to C++ or PyDevice IOC" (Options 3 or 4); that will guide whether to invest in a reusable mirroring layer (Option 1) or keep gateway-only (Option 2).
+4. **Decide scope:** Whether "pvxs in pcaspy IOCs" is only "PVA access to the same PVs" (Options 1, 1b, or 2) or also "future migration to C++ or PyDevice IOC" (Options 3 or 4); that will guide whether to invest in a reusable mirroring layer (Option 1) or keep gateway-only (Option 2).
+
+5. **Consider pcaspy_wrapper (Option 1b):** If minimal-change PVA for many pcaspy IOCs is desired, port pcaspy_wrapper from pvapy to p4p (pvxs), add array/limit support, and roll out via import change; see [evaluation-pcaspy-wrapper.md](evaluation-pcaspy-wrapper.md).
+
+---
+
+## Full migration to pvxs stack (beyond Python IOCs)
+
+Migration to the pvxs stack is broader than Python/pcaspy IOCs. From [kay.md](kay.md):
+
+- **Easy IOCs (C/C++ Base):** Add pvxs & QSRV dbd/libs to the IOC Makefile, reboot. Use or adapt the `add_pvxs.py` script; coordinate with beamline/SE (e.g. Barry & Melissa) on which IOCs to update and when.
+- **IOCs already linking older pvAccess/pvData (e.g. nED, ADnED):** Run QSRV 2 from PVXS for all records; keep custom detector/custom PVA code on the old stack until it is ported to PVXS.
+- **Python (pcaspy) IOCs (~20):** Options include pcaspy_wrapper (Option 1b), p4p alongside (Option 1), gateway (Option 2), or migration to PyDevice (Option 4). Each PyDevice migration is a project (roughly one day to one week per IOC).
+- **Custom C++ (Adara, SMS, nED/ADnED custom code):** Rewrite to use PVXS; requires someone familiar with modern C++ and PVXS.
+- **Older Python PVA clients:** Update scripts that use pvaPy or old p4p to **p4p (pvxs)**; e.g. detector calibration scripts (Greg Guyotte may know scope).
+- **Permission info:** PVA protocol does not yet communicate write permission to clients (cf. [epics-docs PR 140](https://github.com/epics-docs/epics-docs/pull/140)); PVXS implementation TBD. Gateways and GUIs benefit from this once available.
+- **PVA gateway:** Deploy once many IOCs speak PVA; more useful after permission info is in place so the gateway can be read-only and GUIs can show it.
+- **IOC network link type:** EPICS base does not yet provide a global “network_link_type=ca|pva”; currently links are CA. Desired for full PVA-native operation.
+- **Secure PVXS:** Branch in progress; CSS is tracking it. Plan to adopt when an EPICS base release includes secure PVXS (estimate 6+ months) and to decide on certificate strategy.
+
+Task/ticket breakdown with assignees for BL14B HYSPEC is in [bl14b-tasks-tickets.md](bl14b-tasks-tickets.md).
