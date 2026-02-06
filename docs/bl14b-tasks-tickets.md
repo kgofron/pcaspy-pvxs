@@ -68,38 +68,47 @@ These IOCs already have PVXS in the “Have PVA?” column; tasks for validation
 
 ---
 
-### Group: Have PVA? ≠ PVXS → assignee from Assign + PPS + SE
+### Group: Type = Base, Have PVA? ≠ PVXS (add PVXS)
 
-For these IOCs, **Have PVA?** is empty or not "PVXS". Primary assignee is **Assign**; **PPS** and **SE** are appended when present.
+Base IOCs that do **not** yet have a PVXS entry in **Have PVA?**. These are candidates for adding pvxs & QSRV dbd/libs to the Makefile (e.g. via add_pvxs.py), coordinated with the Assign and PPS/SE experts. Primary assignee is **Assign**; **PPS** and **SE** are appended when present.
+
+| IOC | Have PVA? | Assignee(s) |
+|-----|-----------|--------------|
+| bl14b-Cryostat99 | — | Xiaosong Geng; Victor (SE) |
+| bl14b-Det-ADnED | — | Zach |
+| bl14b-Det-nED | — | Zach |
+| bl14b-He3Insert | — | Mariano Ruiz; Victor (SE) |
+| bl14b-Mot-Parker1 | — | Xiaosong Geng |
+| bl14b-Ophir | — | Mariano Ruiz |
+| bl14b-SE-AMI1800 | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-Dilfridge | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-dilULT11 | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-DualValve | — | Xiaosong Geng |
+| bl14b-SE-FitSam | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-Furnace | — | Krishna B; Bekki Mills (SE) |
+| bl14b-SE-HeCompressor | — | Mariano Ruiz |
+| bl14b-SE-HVPulser | — | Mariano Ruiz |
+| bl14b-SE-Keithley2182A | — | Mariano Ruiz |
+| bl14b-SE-LHeAF | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-Mag09DegAF | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-Nutator | — | Mariano Ruiz |
+| bl14b-SE-SlimSam | — | Mariano Ruiz; Victor (SE) |
+| bl14b-SE-TeledynePumpDNF | — | Mariano Ruiz; Jamie Molaison (SE) |
+| bl14b-SE-TeledynePumpH | — | Mariano Ruiz; Jamie Molaison (SE) |
+| bl14b-SE-VacuumCube | — | Mariano Ruiz |
+| bl14b-SPFPO | Code changed, not compiled | Mariano Ruiz |
+| bl14b-Televac | — | Mariano Ruiz |
+
+---
+
+### Group: Have PVA? ≠ PVXS — PyDevice and Python-pcaspy (and other)
+
+IOCs that do **not** have PVXS in **Have PVA?** and are **not** Type = Base: PyDevice, Python-pcaspy, or other. Primary assignee is **Assign**; **PPS** and **SE** are appended when present.
 
 | IOC | Type | Have PVA? | Assignee(s) |
 |-----|------|-----------|--------------|
-| bl14b-Cryostat99 | Base | — | Xiaosong Geng; Victor (SE) |
-| bl14b-Det-ADnED | Base | — | Zach |
-| bl14b-Det-nED | Base | — | Zach |
-| bl14b-He3Insert | Base | — | Mariano Ruiz; Victor (SE) |
 | bl14b-MonitorPVs | PyDevice | — | Jeeem Kohl |
-| bl14b-Mot-Parker1 | Base | — | Xiaosong Geng |
-| bl14b-Ophir | Base | — | Mariano Ruiz |
-| bl14b-SE-AMI1800 | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-Dilfridge | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-dilULT11 | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-DualValve | Base | — | Xiaosong Geng |
-| bl14b-SE-FitSam | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-Furnace | Base | — | Krishna B; Bekki Mills (SE) |
-| bl14b-SE-HeCompressor | Base | — | Mariano Ruiz |
-| bl14b-SE-HVPulser | Base | — | Mariano Ruiz |
-| bl14b-SE-Keithley2182A | Base | — | Mariano Ruiz |
-| bl14b-SE-LHeAF | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-Mag09DegAF | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-Nutator | Base | — | Mariano Ruiz |
-| bl14b-SE-SlimSam | Base | — | Mariano Ruiz; Victor (SE) |
-| bl14b-SE-TeledynePumpDNF | Base | — | Mariano Ruiz; Jamie Molaison (SE) |
-| bl14b-SE-TeledynePumpH | Base | — | Mariano Ruiz; Jamie Molaison (SE) |
 | bl14b-SE-Triopus | PyDevice | — | Mariano Ruiz |
-| bl14b-SE-VacuumCube | Base | — | Mariano Ruiz |
-| bl14b-SPFPO | Base | Code changed, not compiled | Mariano Ruiz |
-| bl14b-Televac | Base | — | Mariano Ruiz |
 | bl14b-AdaraMonitor | Python-pcaspy | — | Jeem |
 | bl14b-Align | Python-pcaspy | — | Ray Gregory |
 | bl14b-AlignXtal | Python-pcaspy | — | Ray Gregory |
@@ -125,7 +134,8 @@ For these IOCs, **Have PVA?** is empty or not "PVXS". Primary assignee is **Assi
 
 ## Summary
 
-- **Kaz Gofron:** All IOCs where Have PVA? = PVXS (37 IOCs in the table above), plus program task T-KAY-1 (easy IOCs rollout).
-- **Assign + PPS/SE:** All other IOCs use the Assign column; PPS and SE are added to the assignee list when those columns are filled in the CSV.
+- **Kaz Gofron:** All IOCs where Have PVA? = PVXS (37 IOCs), plus program task T-KAY-1 (easy IOCs rollout).
+- **Base IOCs not yet PVXS:** 25 Base IOCs with no PVXS in Have PVA? — separate group; add pvxs & QSRV via Makefile; assignees from Assign + PPS + SE.
+- **PyDevice / Python-pcaspy (not yet PVXS):** 2 PyDevice + 20 Python-pcaspy + AccessSecurity; assignees from Assign + PPS + SE.
 - **Program tasks (T-KAY-*):** Assignees are set from kay.md and CSV where applicable; TBD where no specific expert is named.
 - **Source:** BL14B_HYSPEC.csv (SNS BL14B Tasks folder). Update this document if the CSV or assignment rules change.
